@@ -1,0 +1,238 @@
+@font-face {
+    font-family: 'African';
+    src: url('../fonts/African.woff2') format('woff2'),
+            url('../fonts/African.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@keyframes scan {
+    0% {
+        top: 0;
+    }
+    50% {
+        top: 100%;
+    }
+    100% {
+        top: 0;
+    }
+}
+
+:root {
+
+    /* colour palette */
+    --color-red: #8b0000;
+
+    /* 8px grid */
+    --grid-mx8: -64px;
+    --grid-mx7: -56px;
+    --grid-mx6: -48px;
+    --grid-mx5: -40px;
+    --grid-mx4: -32px;
+    --grid-mx3: -24px;
+    --grid-mx2: -16px;
+    --grid-mx1: -8px;
+    --grid-x1: 8px;
+    --grid-x2: 16px;
+    --grid-x3: 24px;
+    --grid-x4: 32px;
+    --grid-x5: 40px;
+    --grid-x6: 48px;
+    --grid-x7: 56px;
+    --grid-x8: 64px;
+}
+
+[x-cloak] {
+    display: none;
+}
+
+body {
+    font-family: 'Roboto';
+    background: linear-gradient(to bottom, #4a7c29, #ffd700);
+    min-height: 100vh;
+}
+
+button {
+    background: linear-gradient(to bottom, #ffde00, #e6c700);
+    border: 4px solid #4a7c29;
+    color: #2d5016;
+    font-family: 'African', sans-serif;
+    font-size: 1.25rem;
+    padding: 0.8rem 2.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #2d5016, 0 8px 15px rgba(0,0,0,0.3);
+    transition: all 0.15s;
+    width: 100%;
+    margin-bottom: var(--grid-x2);
+}
+
+@media screen and (min-width: 768px) {
+    button {
+        width: auto;
+    }
+}
+
+button:hover {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 #2d5016, 0 5px 10px rgba(0,0,0,0.3);
+}
+
+button:active {
+    transform: translateY(5px);
+    box-shadow: 0 0 0 #2d5016;
+}
+
+.masthead {
+    border-top: var(--grid-x1) solid var(--color-red);
+    padding-top: var(--grid-x3);
+    margin-bottom: var(--grid-x5);
+}
+
+.masthead__title a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.masthead__title a:hover {
+    text-decoration: underline;
+}
+
+main {
+    min-height: 0;
+    padding-left: var(--grid-x2);
+    padding-right: var(--grid-x2);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'African';
+    margin-bottom: var(--grid-x2);
+    text-align: center;
+}
+
+h1 { font-size: 2.441rem; }  /* ~39px */
+h2 { font-size: 1.953rem; }  /* ~31px */
+h3 { font-size: 1.563rem; }  /* ~25px */
+h4 { font-size: 1.25rem; }   /* ~20px */
+h5 { font-size: 1rem; }      /* 16px */
+
+p {
+    margin-bottom: var(--grid-x2);
+}
+
+#webcam {
+    transform: scaleX(-1);
+    height: 50vh;
+    width: auto;
+    margin-bottom: var(--grid-x2);
+}
+
+#photo {
+    height: 50vh;
+    width: auto;
+    margin-bottom: var(--grid-x2);
+}
+
+#canvas {
+    display: none;
+}
+
+.booth {
+    position: relative;
+    text-align: center;
+}
+
+.booth__photo {
+    position: relative;
+    width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.booth__buttons {
+    text-align: center;
+}
+
+.photo-scanner {
+    position: relative;
+}
+
+.scanner {
+    position: absolute;
+    width: 100%;
+    height: 50vh;
+    top: 0;
+    left: 0;
+}
+
+@media screen and (min-width: 768px) {
+    .scanner {
+        width: 400px;
+    }
+}
+
+.scanner__laser {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    left: 0;
+    top: 0;
+    background-color: var(--color-red);
+    box-shadow: 0 0 10px var(--color-red), 0 0 20px var(--color-red);
+    animation: scan 5s linear infinite;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+.scanner__text {
+    position: absolute;
+    top: 52vh;
+    font-family: 'African';
+    width: 100%;
+    text-align: center;
+}
+
+.screen {
+    height: 100%;
+}
+
+.screen__background,
+.screen__content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.screen__background {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.screen__background img {
+    max-height: 80%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.screen__image {
+    width: 100%;
+    height: auto;
+    margin-bottom: var(--grid-x4);
+}
+
+@media screen and (min-width: 768px) {
+    .screen__image {
+        width: auto;
+        height: 50vh;
+    }
+}
+
+.screen__cta {
+    text-align: center;
+}

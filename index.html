@@ -1,0 +1,210 @@
+---
+layout: default
+---
+
+<div x-data id="app">
+
+    <canvas id="canvas" width="640" height="480"></canvas>
+
+    <div class="screen" x-show="$store.app.screen === 'intro'">
+        <div class="screen__content">
+            <img src="{{ '/assets/images/dinosaurs-on-holiday.png' | relative_url }}" width="929" height="578" class="screen__image">
+            <button x-on:click="handleGetStarted()" class="bttn-simple bttn-lg bttn-primary">Get started!</button>
+        </div>
+    </div>
+
+    <div class="screen" x-cloak x-show="$store.app.screen === 'mobile-camera'">
+        <div class="screen__content">
+            <img src="{{ '/assets/images/tech-support.png' | relative_url }}" width="510" height="528" class="screen__image">
+            <button class="bttn-simple bttn-lg bttn-primary" x-on:click="handleMobileCameraRequest()">Take photo</button>
+        </div>
+    </div>
+
+    <div class="screen" x-cloak x-show="$store.app.screen === 'camera-permission-request'">
+        <div class="screen__content">
+            <img src="{{ '/assets/images/tech-support.png' | relative_url }}" width="510" height="528" class="screen__image">
+            <button class="bttn-simple bttn-lg bttn-primary" x-on:click="handleCameraEnableRequest()">Switch on camera</button>
+        </div>
+    </div>
+
+    <div class="screen" x-cloak x-show="$store.app.screen === 'camera'">
+        <div class="screen__content">
+            <video id="webcam" width="640" height="480" autoplay playsinline></video>
+            <button class="bttn-simple bttn-lg bttn-primary" x-on:click="handleTakePhotoRequest()">Take photo</button>
+        </div>
+    </div>
+
+    <div class="screen" x-cloak x-show="$store.app.screen === 'photo'">
+        <div class="screen__content">
+            <h2>Chosen photo</h2>
+            <div class="photo-scanner">
+                <img id="photo" width="640" height="480">
+                <div x-show="$store.app.generating === true" class="scanner">
+                    <div class="scanner__laser"></div>
+                    <div class="scanner__text">Analysing</div>
+                </div>
+            </div>
+            <div class="booth__buttons" x-show="$store.app.generating === false">
+                <button class="bttn-simple bttn-lg bttn-primary" x-on:click="handleGetStarted()">Re-take photo</button>
+                <button x-on:click="handleAnalysingCameraPhoto()" class="bttn-simple bttn-lg bttn-primary">Generate dinosaur</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="screen" x-cloak x-show="$store.app.screen === 'ready'">
+        <div class="screen__content">
+            <img src="{{ '/assets/images/tech-support.png' | relative_url }}" width="730" height="842" class="screen__image">
+            <h2>Image ready</h2>
+            <button x-on:click="goto('result')" class="bttn-simple bttn-lg bttn-primary">View image</button>
+        </div>
+    </div>
+
+    <div class="screen" x-cloak x-show="$store.app.screen === 'result'">
+        <div class="screen__content">
+            <h2>You as a dinosaur!</h2>
+            <img src="{{ '/assets/images/generated-image.png' | relative_url }}" width="1024" height="1024" class="screen__image">
+            <button x-on:click="goto('intro')" class="bttn-simple bttn-lg bttn-primary">Start again</button>
+        </div>
+    </div>
+
+</div>
+</main>
+
+<script defer src="https://unpkg.com/alpinejs"></script>
+<script>
+
+    var webcam = document.getElementById('webcam');
+    var stream = null;
+    var canvas = document.getElementById('canvas');
+    var photo = document.getElementById('photo');
+
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    var Camera = {
+        enable: function() {
+            return new Promise(function(resolve, reject) {
+                navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: false
+                })
+                .then(function(mediaStream) {
+                    stream = mediaStream;
+                    webcam.srcObject = stream;
+                    resolve();
+                })
+                .catch(function(err) {
+                    console.log('Error initialising camera', err);
+                    reject();
+                });
+            });
+        },
+
+        disable: function() {
+            if (stream) {
+                var tracks = stream.getTracks();
+                for (var i = 0; i < tracks.length; i += 1) {
+                    tracks[i].stop();
+                }
+                webcam.srcObject = null;
+            }
+        },
+
+        takePhoto: function() {
+            if (isMobile) {
+                return;
+            }
+
+            return new Promise(function(resolve, reject) {
+                canvas.width = webcam.width;
+                canvas.height = webcam.height;
+
+                var context = canvas.getContext('2d');
+
+                context.translate(canvas.width, 0);
+                context.scale(-1, 1);
+
+                context.drawImage(webcam, 0, 0, canvas.width, canvas.height);
+
+                var imageDataURL = canvas.toDataURL('image/png');
+                photo.src = imageDataURL;
+
+                resolve();
+            });
+        },
+
+        takeMobilePhoto: function() {
+            return new Promise(function(resolve, reject) {
+                if (!isMobile) {
+                    return;
+                }
+
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = 'image/*';
+                fileInput.capture = 'user';
+
+                fileInput.addEventListener('change', function(event) {
+                    const file = event.target.files[0];
+
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            photo.src = e.target.result;
+                            resolve();
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+                fileInput.click();
+            });
+        }
+    };
+
+    function handleCameraEnableRequest() {
+        Camera.enable().then(function() {
+            goto('camera');
+        });
+    }
+
+    function handleMobileCameraRequest() {
+        Camera.takeMobilePhoto().then(function() {
+            goto('photo');
+        });
+    }
+
+    function handleTakePhotoRequest() {
+        Camera.takePhoto().then(function() {
+            Alpine.store('app').screen = 'photo';
+        });
+    }
+
+    function handleAnalysingCameraPhoto() {
+        Alpine.store('app').generating = true;
+        Camera.disable();
+        setTimeout(function() {
+            Alpine.store('app').generating = false;
+            Alpine.store('app').screen = 'ready';
+        }, 10000);
+    }
+
+    function handleGetStarted() {
+        if (isMobile) {
+            goto('mobile-camera');
+        } else {
+            goto('camera-permission-request');
+        }
+    }
+
+    function goto(screen) {
+        Alpine.store('app').screen = screen;
+    }
+
+    document.addEventListener('alpine:init', function() {
+        Alpine.store('app', {
+            screen: 'intro',
+            generating: false
+        });
+    });
+
+</script>
